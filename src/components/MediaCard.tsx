@@ -6,6 +6,13 @@ type MediaCardProps = {
   media?: MediaItem;
 };
 
+// Import all media files using Vite's glob import
+// This ensures all media files are properly bundled during build
+const mediaModules = import.meta.glob("../data/media/*", {
+  eager: true,
+  as: "url",
+});
+
 export const MediaCard: React.FC<MediaCardProps> = ({ media }) => {
   if (!media) {
     // Fallback to placeholder if no media
@@ -47,7 +54,19 @@ export const MediaCard: React.FC<MediaCardProps> = ({ media }) => {
     );
   }
 
-  const mediaPath = `/src/data/media/${media.filename}`;
+  // Get the media URL from the imported modules
+  const mediaPath = mediaModules[`../data/media/${media.filename}`] as string;
+
+  if (!mediaPath) {
+    console.error(`Media file not found: ${media.filename}`);
+    return (
+      <div className="rounded-lg overflow-hidden shadow-md bg-pink-50 border border-pink-100">
+        <div className="flex items-center justify-center h-36">
+          <p className="text-pink-600">Media not found: {media.filename}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg overflow-hidden shadow-md bg-white border border-pink-100 hover:shadow-xl transition-shadow duration-300">
